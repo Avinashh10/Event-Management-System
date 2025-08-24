@@ -16,25 +16,25 @@ function issueAuthCookie(res, payload) {
 
 // --- Controllers ---
 exports.showRegister = (req, res) => {
-  res.render('register', { error: null });
+  res.render('Register', { error: null });
 };
 
 exports.registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
-      return res.render('register', { error: 'All fields required' });
+      return res.render('Register', { error: 'All fields required' });
     }
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.render('register', { error: 'Email already registered' });
+      return res.render('Register', { error: 'Email already registered' });
     }
 
     const hashed = await bcrypt.hash(password, 10);
     await User.create({ name, email, password: hashed });
 
-    res.redirect('/login');
+    res.redirect('/Login');
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).send('Internal Server Error');
@@ -42,7 +42,7 @@ exports.registerUser = async (req, res) => {
 };
 
 exports.showLogin = (req, res) => {
-  res.render('login', { error: null });
+  res.render('Login', { error: null });
 };
 
 exports.loginUser = async (req, res) => {
@@ -50,16 +50,16 @@ exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
-    if (!user) return res.render('login', { error: 'Invalid email or password' });
+    if (!user) return res.render('Login', { error: 'Invalid email or password' });
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.render('login', { error: 'Invalid email or password' });
+    if (!valid) return res.render('Login', { error: 'Invalid email or password' });
 
     issueAuthCookie(res, { name: user.name, email: user.email, role: user.role });
 
     if (user.role === 'admin') return res.redirect('/admin/dashboard');
     if (user.role === 'staff') return res.redirect('/staff/dashboard');
-    return res.redirect('/dashboard');
+    return res.redirect('/Dashboard');
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).send('Internal Server Error');
@@ -68,14 +68,14 @@ exports.loginUser = async (req, res) => {
 
 exports.logout = (req, res) => {
   res.clearCookie('token');
-  res.redirect('/login');
+  res.redirect('/Login');
 };
 
 ;
 
 exports.userDashboard = async (req, res) => {
   const events = await Event.find({}); // get all events
-  res.render('dashboard', { user: req.user, events });
+  res.render('Dashboard', { user: req.user, events });
 };
 
 
